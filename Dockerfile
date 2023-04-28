@@ -1,17 +1,26 @@
-FROM ubuntu:latest
-RUN apt update
-RUN apt-get install -y wget openjdk-11-jdk
-RUN wget https://get.jenkins.io/war-stable/2.387.2/jenkins.war 
-RUN wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.74/bin/apache-tomcat-9.0.74.tar.gz
-RUN tar -zxvf apache-tomcat-9.0.74.tar.gz
-RUN cp jenkins.war apache-tomcat-9.0.74/webapps/
-RUN apt-get install -y apache2 
+# Stage 1: Build Jenkins
+FROM ubuntu:latest AS jenkins-build
+RUN apt-get update && \
+    apt-get install -y openjdk-8-jdk wget gnupg2 && \
+    wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | apt-key add - && \
+    echo "deb https://pkg.jenkins.io/debian-stable binary/" >> /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y jenkins && \
+    rm -rf /var/lib/apt/lists/*
 
+# Stage 2: Build Apache2
+FROM ubuntu:latest AS apache2-build
+RUN apt-get update && \
+    apt-get install -y apache2 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Stage 3: Create final image with Jenkins and Apache2
 FROM ubuntu:latest
-WORKDIR /home/ubuntu
-RUN apt-get update && apt-get install -y openjdk-11-jdk 
-COPY --from=stage1 apache-tomcat-9.0.74 .
-EXPOSE 8080
-COPY --from=stage1 /etc/apache2 /etc/apache2
+COPY --from=jenkins-build /usr/share/jenkins /usr/share/jenkins
+COPY --from=apache2-build /usr/sbin/apache2 /usr/sbin/apache2
+COPY --from=apache2-build /etc/apache2 /etc/apache2
+RUN apt-get update && \
+    apt-get install -y openjdk-8-jdk && \
+    rm -rf /var/lib/apt/lists/*
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
 EXPOSE 80
-CMD ["/bin/catalina.sh", "run"]
