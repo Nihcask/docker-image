@@ -1,4 +1,3 @@
-# Stage 1: Build Jenkins
 FROM ubuntu:latest AS jenkins-build
 RUN apt-get update && \
     apt-get install -y openjdk-8-jdk wget gnupg2 && \
@@ -8,13 +7,11 @@ RUN apt-get update && \
     apt-get install -y jenkins && \
     rm -rf /var/lib/apt/lists/*
 
-# Stage 2: Build Apache2
 FROM ubuntu:latest AS apache2-build
 RUN apt-get update && \
     apt-get install -y apache2 && \
     rm -rf /var/lib/apt/lists/*
 
-# Stage 3: Create final image with Jenkins and Apache2
 FROM ubuntu:latest
 COPY --from=jenkins-build /usr/share/jenkins /usr/share/jenkins
 COPY --from=apache2-build /usr/sbin/apache2 /usr/sbin/apache2
