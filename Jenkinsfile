@@ -29,7 +29,7 @@ environment {
 
   stage('deploy') {
     steps {
-      sh "docker run -itd -p 80:8080 shruthi117/shruthi:$BUILD_NUMBER"
+      sh "docker run -itd -p 80:8080 sachink0912/multi_stage_image:$BUILD_NUMBER"
     }
   }
 
