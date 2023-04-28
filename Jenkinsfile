@@ -8,13 +8,13 @@ environment {
     stages {
   stage('checkout') {
     steps {
-      git 'https://github.com/Nihcask/docker-image.git'
+      echo 'checkout stage'
     }
   }
 
   stage('build') {
     steps {
-      sh 'mvn clean install'
+      
       sh 'docker build -t sachink0912/multi_stage_image:$BUILD_NUMBER .' 
 
     }
