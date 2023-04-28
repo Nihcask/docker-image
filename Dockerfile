@@ -1,4 +1,4 @@
-FROM ubuntu:latest AS stage1 
+FROM ubuntu:latest
 RUN apt update
 RUN apt-get install -y wget openjdk-11-jdk
 RUN wget https://get.jenkins.io/war-stable/2.387.2/jenkins.war 
